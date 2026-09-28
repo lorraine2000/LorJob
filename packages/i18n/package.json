@@ -1,0 +1,9 @@
+{
+	"name": "@jobi/i18n",
+	"private": true,
+	"version": "0.1.0",
+	"dependencies": {
+		"@jobi/utils": "workspace:*",
+        "@jobi/types": "workspace:*"
+	}
+}

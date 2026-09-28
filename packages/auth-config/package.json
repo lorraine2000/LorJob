@@ -1,0 +1,14 @@
+{
+	"name": "@jobi/auth-config",
+	"private": true,
+	"version": "0.1.0",
+	"dependencies": {
+		"@jobi/schemas": "workspace:*",
+		"@jobi/types": "workspace:*",
+		"@jobi/constants": "workspace:*",
+		"@jobi/api-utils": "workspace:*",
+		"@jobi/utils": "workspace:*",
+		"@jobi/i18n": "workspace:*",
+		"better-auth": "^1.2.12"
+	}
+}

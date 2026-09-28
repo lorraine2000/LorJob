@@ -1,0 +1,13 @@
+{
+	"name": "@jobi/api-utils",
+	"private": true,
+	"version": "0.1.0",
+	"dependencies": {
+		"@getbrevo/brevo": "2.2.0",
+		"@jobi/schemas": "workspace:*",
+		"@jobi/types": "workspace:*",
+		"@jobi/platform": "workspace:*",
+		"@types/nodemailer": "^6.4.17",
+		"nodemailer": "6.10.0"
+	}
+}

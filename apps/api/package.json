@@ -1,0 +1,31 @@
+{
+  "name": "@jobi/api",
+  "module": "index.ts",
+  "type": "module",
+  "private": true,
+  "prisma": {
+    "schema": "../../prisma/schema.prisma"
+  },
+  "scripts": {
+    "dev": "dotenv -e ../../.env -- bun run --watch src/index.ts",
+    "build": "bun build src/index.ts --outdir=dist --target=node",
+		"prod": "NODE_ENV=production bun src/index.ts"
+  },
+  "devDependencies": {
+    "@types/bun": "latest",
+    "prisma": "^6.12.0"
+  },
+  "peerDependencies": {
+    "typescript": "^5"
+  },
+  "dependencies": {
+    "@hono/zod-validator": "0.7.0",
+    "@jobi/api-types": "workspace:*",
+    "@jobi/enums": "workspace:*",
+    "@jobi/utils": "workspace:*",
+    "@prisma/client": "^6.12.0",
+    "croner": "^9.1.0",
+    "hono": "^4.8.5",
+    "uuid": "^11.1.0"
+  }
+}

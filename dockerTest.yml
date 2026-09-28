@@ -1,0 +1,73 @@
+name:
+  jobi
+
+  # Use custom exposed ports to avoid conflicting with local services
+services:
+  postgres:
+    image: postgres:17.4-alpine
+    env_file:
+      - .env
+    ports:
+      - ${POSTGRES_EXPOSED_PORT}:5432
+    volumes:
+      - ./.data/postgres:/var/lib/postgresql/data
+      - ./scripts/db-entrypoint:/docker-entrypoint-initdb.d
+    healthcheck:
+      test: ['CMD', 'pg_isready', '-U', 'postgres']
+      interval: 15s
+      timeout: 5s
+      retries: 5
+
+  mailhog:
+    image: mailhog/mailhog
+    ports:
+      - 1025:1025
+      - 8025:8025
+    healthcheck:
+      test: ['CMD', 'echo | telnet 127.0.0.1 8025']
+      interval: 1m30s
+      timeout: 5s
+      retries: 3
+
+  minio:
+    image: minio/minio
+    env_file:
+      - .env
+    environment:
+      MINIO_ACCESS_KEY: ${S3_ACCESS_KEY_ID}
+      MINIO_SECRET_KEY: ${S3_SECRET_ACCESS_KEY}
+    command: server --console-address ":9001" /data
+    ports:
+      - 19000:9000
+      - 19001:9001
+    volumes:
+      - ./.data/minio:/data
+    healthcheck:
+      test: ['CMD', 'curl', '-f', 'http://localhost:9000/minio/health/live']
+      interval: 10s
+      timeout: 5s
+      retries: 3
+      start_period: 5s
+
+  init-minio:
+    image: minio/mc
+    depends_on:
+      minio:
+        condition: service_healthy
+    entrypoint: >
+      /bin/sh -c '
+      if [ "$MINIO_INIT" != 1 ]; then
+        echo "Skipping minio initialization";
+        exit 0
+      fi;
+      /usr/bin/mc config host add localminio http://minio:9000 $S3_ACCESS_KEY_ID $S3_SECRET_ACCESS_KEY;
+      /usr/bin/mc mb localminio/$S3_BUCKET_NAME_REPORTS;
+      /usr/bin/mc anonymous set public localminio/$S3_BUCKET_NAME_REPORTS; # Allow public access to reports
+
+      /usr/bin/mc mb localminio/$S3_BUCKET_NAME_THUMBNAILS;
+      /usr/bin/mc anonymous set public localminio/$S3_BUCKET_NAME_THUMBNAILS; # Allow public access to thumbnails
+
+      /usr/bin/mc mb localminio/$S3_BUCKET_NAME_ATTACHMENTS;
+      /usr/bin/mc anonymous set public localminio/$S3_BUCKET_NAME_ATTACHMENTS; # Allow public access to attachments
+      exit 0;
+      '

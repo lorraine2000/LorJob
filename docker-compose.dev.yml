@@ -1,0 +1,16 @@
+name:
+  jobi
+
+  # Use custom exposed ports to avoid conflicting with local services
+services:
+  mailhog:
+    image: mailhog/mailhog
+    platform: linux/amd64
+    ports:
+      - 1026:1025
+      - 8026:8025
+    healthcheck:
+      test: ['CMD', 'echo | telnet 127.0.0.1 8025']
+      interval: 1m30s
+      timeout: 5s
+      retries: 3

@@ -1,0 +1,10 @@
+{
+	"name": "@jobi/utils",
+	"private": true,
+	"version": "0.1.0",
+	"dependencies": {
+		"@jobi/schemas": "workspace:*",
+        "@jobi/types": "workspace:*",
+		"@jobi/hooks": "workspace:*"
+	}
+}

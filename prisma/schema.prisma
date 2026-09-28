@@ -1,0 +1,134 @@
+
+generator client {
+  provider = "prisma-client-js"
+  binaryTargets = ["native", "debian-openssl-3.0.x"]
+  //output   = "../generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id String @id @default(dbgenerated("gen_random_uuid()"))
+
+  firstName String @default("") @map("first_name")
+  lastName  String @default("") @map("last_name")
+  name      String
+
+  email           String    @unique
+  emailVerified   Boolean   @default(false) @map("email_verified")
+  isFindingJob Boolean   @default(false) @map("is_finding_job")
+  password        String?   @map("password_hash")
+  image           String?
+  objectif_quotidien    Int?
+  preferredLocale String    @default("fr") @map("preferred_locale")
+  createdAt       DateTime @default(now()) @map("created_at")
+  updatedAt       DateTime @default(now()) @updatedAt @map("updated_at")
+  sessions        Session[]
+  accounts        Account[]
+  jobApplication  JobApplication[]
+
+  @@map("users")
+}
+
+model Session {
+  id        String   @id
+  expiresAt DateTime
+  token     String
+  createdAt DateTime
+  updatedAt DateTime
+  ipAddress String?
+  userAgent String?
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([token])
+  @@map("session")
+}
+
+model Account {
+  id                    String    @id
+  accountId             String
+  providerId            String
+  userId                String
+  user                  User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  accessToken           String?
+  refreshToken          String?
+  idToken               String?
+  accessTokenExpiresAt  DateTime?
+  refreshTokenExpiresAt DateTime?
+  scope                 String?
+  password              String?
+  createdAt       DateTime @default(now()) @map("created_at")
+  updatedAt       DateTime @default(now()) @updatedAt @map("updated_at")
+
+  @@map("account")
+}
+
+model Verification {
+  id         String    @id
+  identifier String
+  value      String
+  expiresAt  DateTime
+  createdAt  DateTime?
+  updatedAt  DateTime?
+
+  @@map("verification")
+}
+
+enum Statut {
+  candidature_envoyee
+  en_attente_reponse
+  entretien_programme
+  entretien_passe
+  refus
+  accepte
+  relance_necessaire
+}
+
+enum Priorite {
+  faible
+  moyenne
+  haute
+}
+
+model JobApplication {
+  id                 String   @id @default(cuid())
+  entreprise         String
+  poste              String
+  lieu               String      
+  salaire_min        Float?       // optional
+  salaire_max        Float?       // optional
+  description        String?      // optional
+  statut             Statut       @default(candidature_envoyee)
+  date_candidature   DateTime
+  date_relance       DateTime?    // optional
+  prochaine_relance  DateTime     // optional
+  contact_email      String?      // optional
+  contact_nom        String?      // optional
+  url_offre          String?      // optional
+  notes              String?      // optional
+  priorite           Priorite     @default(moyenne)
+
+  userId             String
+  user               User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+  relances           Relance[]    
+
+  createdAt          DateTime @default(now()) @map("created_at")
+  updatedAt          DateTime @default(now()) @updatedAt @map("updated_at")
+  @@map("jobApplications")
+}
+
+model Relance {
+  id              String   @id @default(uuid())
+  dateRelance     DateTime?
+  note            String?
+  emailSent           Boolean          @default(false)
+  statut          String   @default("à faire")
+  jobApplication  JobApplication @relation(fields: [jobApplicationId], references: [id])
+  jobApplicationId String
+
+  @@map("relances")
+}
